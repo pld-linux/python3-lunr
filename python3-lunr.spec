@@ -1,14 +1,17 @@
+#
 # Conditional build:
 %bcond_without	doc	# API documentation
 %bcond_without	tests	# unit tests
 
 %define		module	lunr
 Summary:	A Python implementation of Lunr.js
+Summary(pl.UTF-8):	Pythonowa implementacja Lunr.js
 Name:		python3-%{module}
 Version:	0.8.0
 Release:	1
 License:	MIT
 Group:		Libraries/Python
+#Source0Download: https://pypi.org/simple/lunr/
 Source0:	https://files.pythonhosted.org/packages/source/l/lunr/%{module}-%{version}.tar.gz
 # Source0-md5:	ec394d06983ee22000d2c52d5892593c
 URL:		https://pypi.org/project/lunr/
@@ -31,6 +34,12 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 This Python version of Lunr.js aims to bring the simple and powerful
 full text search capabilities into Python guaranteeing results as
 close as the original implementation as possible.
+
+%description -l pl.UTF-8
+Ta pythonowa wersja Lunr.js ma na celu dostarczenie prostej i mającej
+duże możliwości funkcjonalności wyszukiwania pełnotekstowego do
+Pythona, gwarantując efekty możliwie najbliższe oryginalnej
+implementacji.
 
 %package apidocs
 Summary:	API documentation for Python %{module} module
