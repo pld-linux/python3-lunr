@@ -1,7 +1,8 @@
 #
 # Conditional build:
-%bcond_without	doc	# API documentation
-%bcond_without	tests	# unit tests
+%bcond_without	doc		# API documentation
+%bcond_without	tests		# unit+acceptance tests
+%bcond_without	acctests	# acceptance tests
 
 %define		module	lunr
 Summary:	A Python implementation of Lunr.js
@@ -16,14 +17,27 @@ Source0:	https://files.pythonhosted.org/packages/source/l/lunr/%{module}-%{versi
 # Source0-md5:	ec394d06983ee22000d2c52d5892593c
 URL:		https://pypi.org/project/lunr/
 BuildRequires:	python3-build
+BuildRequires:	python3-hatch-fancy-pypi-readme >= 22.8.0
+BuildRequires:	python3-hatchling
 BuildRequires:	python3-installer
 BuildRequires:	python3-modules >= 1:3.7
 %if %{with tests}
-#BuildRequires:	python3-
+%if %{with acctests}
+BuildRequires:	nodejs
+%endif
+BuildRequires:	python3-nltk
+BuildRequires:	python3-pytest
+BuildRequires:	python3-pytest-timeout
+%if "%{py3_ver}" == "3.7"
+BuildRequires:	python3-importlib_metadata
+BuildRequires:	python3-typing_extensions
+%endif
 %endif
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 2.044
 %if %{with doc}
+BuildRequires:	python3-furo
+BuildRequires:	python3-myst_parser
 BuildRequires:	sphinx-pdg-3
 %endif
 Requires:	python3-modules >= 1:3.7
@@ -60,10 +74,8 @@ Dokumentacja API modułu Pythona %{module}.
 
 %if %{with tests}
 %{__python3} -m zipfile -e build-3/*.whl build-3-test
-# use explicit plugins list for reliable builds (delete PYTEST_PLUGINS if empty)
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
-PYTEST_PLUGINS= \
-%{__python3} -m pytest -o pythonpath="$PWD/build-3-test" tests
+%{__python3} -m pytest -o pythonpath="$PWD/build-3-test" tests %{!?with_acctests:-m 'not acceptance'}
 %endif
 
 %if %{with doc}
@@ -71,7 +83,6 @@ PYTEST_PLUGINS= \
 PYTHONPATH=$(pwd)/build-3-doc \
 %{__make} -C docs html \
 	SPHINXBUILD=sphinx-build-3
-rm -rf docs/_build/html/_sources
 %endif
 
 %install
@@ -84,12 +95,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc CHANGELOG.md README.md
+%doc CHANGELOG.md LICENSE README.md
 %{py3_sitescriptdir}/%{module}
 %{py3_sitescriptdir}/%{module}-%{version}.dist-info
 
 %if %{with doc}
 %files apidocs
 %defattr(644,root,root,755)
-%doc docs/_build/html/*
+%doc docs/_build/html/{_static,*.html,*.js}
 %endif
